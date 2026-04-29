@@ -1,0 +1,26 @@
+# vaultdiff configuration file
+# All fields can be overridden by environment variables.
+
+# Vault server address (env: VAULT_ADDR)
+vault_addr: "http://127.0.0.1:8200"
+
+# Vault token (env: VAULT_TOKEN)
+# Prefer setting this via environment variable rather than storing in file.
+vault_token: ""
+
+# KV secrets engine mount path (env: VAULTDIFF_MOUNT, default: secret)
+mount: "secret"
+
+# Output format: text | json | yaml (env: VAULTDIFF_OUTPUT, default: text)
+output: "text"
+
+# Keys whose values should be masked in diff output (env: VAULTDIFF_MASK_KEYS, comma-separated)
+mask_keys:
+  - password
+  - api_key
+  - secret
+  - token
+
+# Path to append audit log entries (env: VAULTDIFF_AUDIT_LOG)
+# Leave empty to disable audit logging.
+audit_log: ""
