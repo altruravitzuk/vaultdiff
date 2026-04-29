@@ -8,8 +8,8 @@ import (
 
 // Client wraps the Vault API client with helper methods.
 type Client struct {
-	api    *vaultapi.Client
-	Mount  string
+	api   *vaultapi.Client
+	Mount string
 }
 
 // Config holds configuration for connecting to a Vault instance.
@@ -68,4 +68,30 @@ func (c *Client) ReadSecretVersion(path string, version int) (map[string]interfa
 		return nil, fmt.Errorf("unexpected data format for secret %q", path)
 	}
 	return data, nil
+}
+
+// ListSecrets returns the list of secret keys under the given path in KV v2.
+func (c *Client) ListSecrets(path string) ([]string, error) {
+	vaultPath := fmt.Sprintf("%s/metadata/%s", c.Mount, path)
+
+	secret, err := c.api.Logical().List(vaultPath)
+	if err != nil {
+		return nil, fmt.Errorf("listing secrets at %q: %w", path, err)
+	}
+	if secret == nil {
+		return nil, fmt.Errorf("no secrets found at %q", path)
+	}
+
+	raw, ok := secret.Data["keys"].([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("unexpected keys format at %q", path)
+	}
+
+	keys := make([]string, 0, len(raw))
+	for _, k := range raw {
+		if s, ok := k.(string); ok {
+			keys = append(keys, s)
+		}
+	}
+	return keys, nil
 }
